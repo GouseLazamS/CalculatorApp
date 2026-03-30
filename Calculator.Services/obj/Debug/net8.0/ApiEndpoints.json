@@ -1,0 +1,54 @@
+[
+  {
+    "ContainingType": "Calculator.Services.Controllers.CalculatorController",
+    "Method": "Calculate",
+    "RelativePath": "api/Calculator/calculate",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "expression",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "v1",
+        "Type": "System.Double",
+        "IsRequired": false
+      },
+      {
+        "Name": "v2",
+        "Type": "System.Double",
+        "IsRequired": false
+      },
+      {
+        "Name": "type",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Calculator.Services.Controllers.WeatherForecastController",
+    "Method": "Get",
+    "RelativePath": "WeatherForecast",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[Calculator.Services.WeatherForecast, Calculator.Services, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ],
+    "EndpointName": "GetWeatherForecast"
+  }
+]
