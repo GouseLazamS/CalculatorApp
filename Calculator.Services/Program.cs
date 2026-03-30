@@ -15,8 +15,15 @@ builder.Services.AddDbContext<CalculatorDbContext>(options =>
 
 builder.Services.AddScoped<ICalculatorRepository, CalculatorRepository>();
 
-var app = builder.Build();
+builder.Services.AddCors(options => {
+    options.AddPolicy("AllowAll", b => b.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin());
+});
 
+
+
+var app = builder.Build();
+// ... after builder.Build()
+app.UseCors("AllowAll");
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
