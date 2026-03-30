@@ -25,36 +25,47 @@ namespace Calculator.DAL
                 .ToListAsync();
         }
 
-        public async Task<CalculationHistory> CalculateAsync(string operation, double n1, double? n2 = null)
+        
+       public async Task<double> CalculateAsync(string expression, double n1, double n2, string operation)
         {
+            // Perform Scientific Logic
             double result = operation.ToLower() switch
             {
-                "add" => n1 + (n2 ?? 0),
-                "subtract" => n1 - (n2 ?? 0),
-                "multiply" => n1 * (n2 ?? 1),
-                "divide" => (n2 == 0) ? throw new DivideByZeroException("Cannot divide by zero.") : n1 / n2.Value,
-                "pow" => Math.Pow(n1, n2 ?? 1),
-                "sqrt" => n1 < 0 ? throw new ArgumentException("Cannot square root negative.") : Math.Sqrt(n1),
+                "add" => n1 + n2,
+                "subtract" => n1 - n2,
+                "multiply" => n1 * n2,
+                "divide" => n2 != 0 ? n1 / n2 : throw new DivideByZeroException(),
+                "pow" => Math.Pow(n1, n2),
+                "sqrt" => n1 >= 0 ? Math.Sqrt(n1) : throw new ArgumentException("Negative Sqrt"),
                 "sin" => Math.Sin(n1 * (Math.PI / 180)),
                 "cos" => Math.Cos(n1 * (Math.PI / 180)),
-                "tan" => Math.Tan(n1 * (Math.PI / 180)),
-                "log" => n1 <= 0 ? throw new ArgumentException("Log must be > 0.") : Math.Log10(n1),
-                _ => throw new KeyNotFoundException($"Operation {operation} not supported.")
-            };
+                "log" => n1 > 0 ? Math.Log10(n1) : throw new ArgumentException("Log > 0"),
+                _ => throw new NotSupportedException("Op not found")
+            }; // Ensure semicolon is here
 
-            var entry = new CalculationHistory
+            // High-Performance Transaction
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                Expression = n2.HasValue ? $"{n1} {operation} {n2}" : $"{operation}({n1})",
-                Result = result,
-                OperationType = operation,
-                CreatedAt = DateTimeOffset.Now
-            };
+                var history = new CalculationHistory
+                {
+                    Expression = expression,
+                    Result = result,
+                    OperationType = operation,
+                    CreatedAt = DateTimeOffset.Now
+                };
 
-            _context.CalculationHistories.Add(entry);
-            await _context.SaveChangesAsync();
-            return entry;
+                _context.CalculationHistories.Add(history);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return result;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
-
         public async Task ClearHistoryAsync()
         {
             var history = await _context.CalculationHistories.ToListAsync();
