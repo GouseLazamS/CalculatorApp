@@ -16,26 +16,23 @@ builder.Services.AddDbContext<CalculatorDbContext>(options =>
 builder.Services.AddScoped<ICalculatorRepository, CalculatorRepository>();
 
 // 3. Define the CORS Policy
-// Use a specific name like "FrontendPolicy" for better clarity
 builder.Services.AddCors(options => {
     options.AddPolicy("FrontendPolicy", b =>
-        b.AllowAnyMethod()
+        b.WithOrigins("https://gouselazams.github.io") // Explicitly allow your hosted frontend
+         .AllowAnyMethod()
          .AllowAnyHeader()
-         // When you host the backend, you can replace AllowAnyOrigin with your specific GitHub URL
-         .AllowAnyOrigin());
+         .SetIsOriginAllowedToAllowWildcardSubdomains());
 });
 
 var app = builder.Build();
 
 // 4. Configure the HTTP request pipeline.
-// IMPORTANT: UseCors must come BEFORE MapControllers and AFTER UseRouting (if present)
+// UseRouting is implicit in .NET 8, but UseCors MUST come before MapControllers
 app.UseCors("FrontendPolicy");
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// Allow Swagger in production if you want to test the hosted API
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
