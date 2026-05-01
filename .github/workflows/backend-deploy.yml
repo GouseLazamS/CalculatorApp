@@ -1,0 +1,26 @@
+name: Deploy .NET Backend
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-deploy:
+    runs-on: windows-latest # Better for .NET enterprise builds
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Publish
+        run: dotnet publish Calculator.Services/Calculator.Services.csproj -c Release -o ./publish
+
+      - name: Deploy to Azure (Example)
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'your-unique-app-name'
+          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
+          package: ./publish
