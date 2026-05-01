@@ -4,27 +4,33 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
+// 1. Add services to the container.
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// 2. Database Configuration
 builder.Services.AddDbContext<CalculatorDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<ICalculatorRepository, CalculatorRepository>();
 
+// 3. Define the CORS Policy
+// Use a specific name like "FrontendPolicy" for better clarity
 builder.Services.AddCors(options => {
-    options.AddPolicy("AllowAll", b => b.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin());
+    options.AddPolicy("FrontendPolicy", b =>
+        b.AllowAnyMethod()
+         .AllowAnyHeader()
+         // When you host the backend, you can replace AllowAnyOrigin with your specific GitHub URL
+         .AllowAnyOrigin());
 });
 
-
-
 var app = builder.Build();
-// ... after builder.Build()
-app.UseCors("AllowAll");
-// Configure the HTTP request pipeline.
+
+// 4. Configure the HTTP request pipeline.
+// IMPORTANT: UseCors must come BEFORE MapControllers and AFTER UseRouting (if present)
+app.UseCors("FrontendPolicy");
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
